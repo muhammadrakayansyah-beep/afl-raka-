@@ -1,6 +1,7 @@
 # Trading Dashboard
 
 Dashboard trading dengan antarmuka HTML statis dan satu fungsi serverless untuk mengambil kuotasi Yahoo Finance same-origin di Vercel. Tidak memerlukan framework, dependency, atau proses build.
+Backtest dashboard memakai rentang tetap sejak 1 Januari 2010; tidak ada pemilih periode di antarmuka.
 
 ## Isi proyek
 

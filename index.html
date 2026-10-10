@@ -142,14 +142,7 @@ footer{margin-top:28px;font-size:.8rem;color:var(--muted);border-top:1px solid v
   <section class="setup" aria-label="Pengaturan">
     <div class="controls">
       <span class="field"><strong>Sistem tunggal: tren + pullback + crossover</strong></span>
-      <label class="field">Periode backtest
-        <select id="range">
-          <option value="3">3 tahun terakhir</option><option value="5">5 tahun terakhir</option>
-          <option value="10">10 tahun terakhir</option><option value="20">20 tahun terakhir</option>
-          <option value="2010" selected>Sejak 1 Jan 2010</option>
-          <option value="all">Semua data</option>
-        </select>
-      </label>
+      <span class="field">Backtest tetap sejak 1 Jan 2010</span>
       <button class="btn" id="run" type="button">Hitung</button>
       <button class="btn ghost" id="optimize" type="button" disabled>Optimasi sistem tunggal</button>
       <span class="field">Kuotasi Yahoo: otomatis tiap 1 menit</span>
@@ -620,7 +613,7 @@ async function getSymbol(sym,range,interval='1d'){
 
 /* ---------- Pengaturan ---------- */
 const SET_KEY='dash-ma-k100-settings-v3';
-const FIELDS=['range','fast','slow','eq0','feeB','feeS','proxy','wlFilter','bRsiN','bRsiE','bTp','bTs','bSl','bSlots'];
+const FIELDS=['fast','slow','eq0','feeB','feeS','proxy','wlFilter','bRsiN','bRsiE','bTp','bTs','bSl','bSlots'];
 try{ const s=JSON.parse(localStorage.getItem(SET_KEY)||'{}'); FIELDS.forEach(f=>{ if(s[f]!==undefined) $(f).value=s[f]; }); }catch(e){}
 function saveSettings(){ try{ const s={}; FIELDS.forEach(f=>s[f]=$(f).value); localStorage.setItem(SET_KEY,JSON.stringify(s)); }catch(e){} }
 function universe(){
@@ -648,6 +641,7 @@ function priceFor(code,bars){
 
 const OPT_TRAIN_START=Date.UTC(2010,0,1);
 const OPT_VALIDATION_START=Date.UTC(2019,0,1);
+const BACKTEST_START=Date.UTC(2010,0,1);
 function optimizationCandidates(base){
   const out=[];
   for(const fast of [20,50]) for(const slow of [100,200]) if(fast<slow)
@@ -743,13 +737,12 @@ function compute(){
   if(!(P.fast>=2&&P.slow>P.fast)){ setStatus('Parameter tidak valid: Slow MA harus lebih besar dari Fast MA.'); return; }
   saveSettings();
   const codes=universe(); RESULTS=[]; SKIPPED=[];
-  let lastT=-Infinity; const got=[];
+  const got=[];
   for(const c of codes){ const b=barsFor(c); if(!b){ SKIPPED.push({code:c,why:'bukan saham di data tertanam; hanya kuotasi Yahoo yang tersedia, tidak dihitung dalam backtest'}); continue; }
     const need=Math.max(P.slow+2,P.rsiN+1);
     if(b.length<need){ SKIPPED.push({code:c,why:'hanya '+b.length+' hari data, kurang dari '+need+' hari yang dibutuhkan indikator'}); continue; }
-    got.push([c,b]); lastT=Math.max(lastT,b[b.length-1].t); }
-  const rv=$('range').value;
-  const startT= rv==='all' ? -Infinity : rv==='2010' ? Date.UTC(2010,0,1) : (()=>{ const d=new Date(lastT); d.setUTCFullYear(d.getUTCFullYear()-(+rv)); return d.getTime(); })();
+    got.push([c,b]); }
+  const startT=BACKTEST_START;
   for(const [c,b] of got){ const bt=backtestHybrid(b,P,startT); if(bt.series.length) RESULTS.push({code:c,bars:b,bt}); else SKIPPED.push({code:c,why:'tidak ada data dalam periode'}); }
   const sel=$('view'), keep=sel.value;
   PORT=RESULTS.length?portfolioB(RESULTS,P,startT):null;
@@ -1020,7 +1013,6 @@ $('recoFilter').addEventListener('change',renderRecommendations);
 $('recoSearch').addEventListener('input',renderRecommendations);
 $('view').addEventListener('change',()=>{ if(RESULTS.length) renderView(); });
 function handleParameterChange(){ invalidateOptimization(); compute(); }
-$('range').addEventListener('change',compute);
 ['bRsiN','bRsiE','bTp','bTs','bSl','bSlots'].forEach(id=>$(id).addEventListener('change',handleParameterChange));
 ['fast','slow','eq0','feeB','feeS'].forEach(id=>$(id).addEventListener('change',handleParameterChange));
 $('wlFilter').addEventListener('change',()=>{ saveSettings(); renderWatch(); });
