@@ -129,25 +129,62 @@ footer{margin-top:28px;font-size:.8rem;color:var(--muted);border-top:1px solid v
 .forecast{font-size:.78rem;color:var(--muted);white-space:normal;min-width:150px}
 .forecast strong{display:block;color:var(--ink);font-size:.82rem}
 @media(max-width:600px){.reco-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.reco-stat:nth-child(2){border-right:0}.reco-stat:nth-child(-n+2){border-bottom:1px solid var(--rule)}}
+.top h1{font-size:2rem}
+.setup{padding:12px 16px}
+.setup>details:not([open]){margin-top:6px}
+.setup-toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.setup-label{font-size:.8rem;font-weight:600;color:var(--muted)}
+.setup-toolbar .controls{align-items:center}
+.portfolio-overview{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:10px;overflow:hidden;margin:16px 0 4px}
+.portfolio-stat{background:var(--panel);padding:14px 16px;min-width:0}
+.portfolio-stat span{display:block;color:var(--muted);font-size:.78rem}
+.portfolio-stat strong{display:block;font-size:1.25rem;line-height:1.2;margin-top:4px;overflow:hidden;text-overflow:ellipsis}
+.portfolio-stat small{display:block;color:var(--muted);font-size:.72rem;margin-top:4px}
+.focus-panel{margin-top:14px}
+.focus-panel h2{display:flex;align-items:center;gap:8px}
+.focus-intro{font-size:.84rem;color:var(--muted);margin:-4px 0 14px}
+.screen-controls{display:flex;gap:10px 14px;align-items:flex-end;flex-wrap:wrap}
+.screen-controls .field input,.screen-controls .field select{min-height:38px}
+.wl-grid{gap:20px}
+.wl-grid>div{min-width:0}
+.focus-panel .scroll{max-height:440px}
+.focus-panel .scroll thead th{position:sticky;top:0;background:var(--panel);z-index:1}
+.section-kicker{font-size:.74rem;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+@media(max-width:850px){.portfolio-overview{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:560px){.portfolio-overview{grid-template-columns:repeat(2,minmax(0,1fr))}.portfolio-stat{padding:12px}.portfolio-stat strong{font-size:1.08rem}.focus-panel{padding:14px}.focus-panel .scroll{max-height:none}.screen-controls{width:100%}.screen-controls .field{flex:1 1 140px}.screen-controls .field input,.screen-controls .field select{width:100%!important}}
+@media(max-width:560px){.setup-toolbar{align-items:flex-start}.setup-toolbar .controls{width:100%}.setup-toolbar .controls .btn{flex:1}.setup-label{max-width:100%}}
 </style>
 </head>
 <body>
 <div class="wrap">
 
   <header class="top">
-    <h1>Sinyal &amp; rekomendasi Kompas100</h1>
-    <p class="sub" id="dataLabel">Menyiapkan rekomendasi otomatis…</p>
+    <h1>Portofolio &amp; stock screener</h1>
+    <p class="sub" id="dataLabel">Dashboard portofolio Kompas100 · Menyiapkan data…</p>
   </header>
 
+  <p class="status" id="status" role="status">Memuat data…</p>
+  <div class="banner" id="banner"></div>
+  <div class="banner" id="outlier"></div>
+  <section class="portfolio-overview" id="portfolioOverview" aria-label="Ringkasan portofolio">
+    <div class="portfolio-stat"><span>Nilai portofolio*</span><strong id="portfolioValue">—</strong><small id="portfolioDate">Menunggu data</small></div>
+    <div class="portfolio-stat"><span>Kas tersedia*</span><strong id="portfolioCash">—</strong><small>Estimasi simulasi</small></div>
+    <div class="portfolio-stat"><span>Nilai posisi*</span><strong id="portfolioInvested">—</strong><small id="portfolioExposure">Eksposur portofolio</small></div>
+    <div class="portfolio-stat"><span>Posisi / kapasitas</span><strong id="portfolioSlots">—</strong><small id="portfolioQueued">Antrean beli: —</small></div>
+    <div class="portfolio-stat"><span>P/L terbuka*</span><strong id="portfolioUnrealized">—</strong><small>Estimasi setelah biaya jual</small></div>
+  </section>
+  <p class="mini portfolio-disclaimer">*Estimasi berdasarkan backtest dan kuotasi Yahoo bila tersedia; bukan saldo akun broker.</p>
+
   <section class="setup" aria-label="Pengaturan">
-    <div class="controls">
-      <span class="field"><strong>Sistem tunggal: tren + pullback + crossover</strong></span>
-      <span class="field">Backtest tetap sejak 1 Jan 2010</span>
-      <button class="btn" id="run" type="button">Hitung</button>
-      <button class="btn ghost" id="optimize" type="button" disabled>Optimasi sistem tunggal</button>
-      <span class="field">Kuotasi Yahoo: otomatis tiap 1 menit</span>
+    <div class="setup-toolbar">
+      <span class="setup-label">Sistem tunggal · Backtest sejak 1 Jan 2010</span>
+      <div class="controls">
+        <button class="btn" id="run" type="button">Perbarui simulasi</button>
+        <button class="btn ghost" id="optimize" type="button" disabled>Optimasi parameter</button>
+        <span class="field">Yahoo otomatis · 1 menit</span>
+      </div>
     </div>
-    <details open>
+    <details>
       <summary>Parameter strategi &amp; biaya</summary>
       <div class="controls" style="margin-top:10px">
         <label class="field">Fast MA tren<input class="num" type="number" id="fast" value="50" min="2" step="1"></label>
@@ -186,21 +223,52 @@ footer{margin-top:28px;font-size:.8rem;color:var(--muted);border-top:1px solid v
     </div>
   </section>
 
-  <p class="status" id="status" role="status">Memuat data…</p>
-  <div class="banner" id="banner"></div>
-  <div class="banner" id="outlier"></div>
+  <section class="panel focus-panel" aria-labelledby="wlTitle">
+    <div class="section-kicker">Kelola posisi &amp; temukan kandidat</div>
+    <h2 id="wlTitle">Portofolio &amp; screening saham</h2>
+    <p class="sub" id="wlRule" style="font-size:.86rem;max-width:90ch;margin-bottom:14px"></p>
+    <div class="wl-grid">
+      <div>
+        <h3>Posisi aktif <span class="count on" id="cntAktif">0</span></h3>
+        <div class="scroll"><table>
+          <thead id="actHead"></thead>
+          <tbody id="actBody"></tbody>
+        </table></div>
+        <div class="empty" id="actEmpty">Tidak ada posisi aktif.</div>
+      </div>
+      <div>
+        <div class="viewbar" style="margin-bottom:6px">
+          <h3 style="margin:0">Hasil screening <span class="count" id="cntPantau">0</span></h3>
+          <div class="screen-controls">
+            <label class="field">Filter
+              <select id="wlFilter"><option value="gc">Dalam tren naik</option><option value="all">Semua saham</option><option value="wait">Di luar tren</option></select>
+            </label>
+            <label class="field">Cari ticker
+              <input id="wlSearch" placeholder="mis. BBCA" style="width:110px;text-transform:uppercase" autocomplete="off" spellcheck="false">
+            </label>
+          </div>
+        </div>
+        <div class="scroll"><table>
+          <thead id="wlHead"></thead>
+          <tbody id="wlBody"></tbody>
+        </table></div>
+        <div class="empty" id="wlEmpty">Tidak ada saham pada filter ini.</div>
+      </div>
+    </div>
+  </section>
 
-  <section class="panel" aria-labelledby="recoTitle">
+  <section class="panel focus-panel" aria-labelledby="recoTitle">
+    <div class="section-kicker">Watchlist strategi</div>
     <div class="viewbar">
       <div>
-        <h2 id="recoTitle">Rekomendasi otomatis <span class="count" id="recoCount">0</span></h2>
+        <h2 id="recoTitle">Sinyal beli &amp; jual <span class="count" id="recoCount">0</span></h2>
         <p class="sub" id="recoBasis" style="font-size:.84rem">Mengikuti sinyal strategi dan harga terbaru yang tersedia.</p>
       </div>
       <label class="field">Tampilkan
         <select id="recoFilter"><option value="priority">Prioritas tindakan</option><option value="all">Semua saham</option><option value="held">Posisi aktif</option><option value="setup">Setup &amp; pantau</option></select>
       </label>
       <label class="field">Cari saham
-        <input id="recoSearch" placeholder="mis. BBCA" style="width:110px;text-transform:uppercase" autocomplete="off" spellcheck="false">
+        <input id="recoSearch" placeholder="mis. BBCA" style="width:120px;text-transform:uppercase" autocomplete="off" spellcheck="false">
       </label>
     </div>
     <div class="reco-summary" aria-label="Ringkasan rekomendasi">
@@ -259,37 +327,6 @@ footer{margin-top:28px;font-size:.8rem;color:var(--muted);border-top:1px solid v
     <h2>Konsistensi win rate per tahun</h2>
     <p class="sub" style="font-size:.84rem;margin-bottom:10px">Dikelompokkan menurut tahun trade ditutup. Garis tipis = target 70%.</p>
     <div class="scroll"><table id="yrTable"></table></div>
-  </section>
-
-  <section class="panel" aria-labelledby="wlTitle">
-    <h2 id="wlTitle">Daftar pantau &amp; posisi aktif</h2>
-    <p class="sub" id="wlRule" style="font-size:.86rem;max-width:78ch;margin-bottom:14px"></p>
-    <div class="wl-grid">
-      <div>
-        <h3>Posisi aktif <span class="count on" id="cntAktif">0</span></h3>
-        <div class="scroll"><table>
-          <thead id="actHead"></thead>
-          <tbody id="actBody"></tbody>
-        </table></div>
-        <div class="empty" id="actEmpty">Tidak ada posisi aktif.</div>
-      </div>
-      <div>
-        <div class="viewbar" style="margin-bottom:6px">
-          <h3 style="margin:0">Daftar pantau <span class="count" id="cntPantau">0</span></h3>
-          <div class="controls">
-            <label class="field">Tampilkan
-              <select id="wlFilter"><option value="gc">Golden cross aktif</option><option value="all">Semua</option><option value="wait">Menunggu golden cross</option></select>
-            </label>
-            <label class="field">Cari kode<input id="wlSearch" style="width:110px;text-transform:uppercase" autocomplete="off"></label>
-          </div>
-        </div>
-        <div class="scroll"><table>
-          <thead id="wlHead"></thead>
-          <tbody id="wlBody"></tbody>
-        </table></div>
-        <div class="empty" id="wlEmpty">Tidak ada saham pada filter ini.</div>
-      </div>
-    </div>
   </section>
 
   <section class="panel">
@@ -546,7 +583,7 @@ function portfolioB(results,p,startT){
       cand.sort((a,b)=>R[a].I.r[has[a]]-R[b].I.r[has[b]]); pendBuy=cand.slice(0,free);
     }
   }
-  const open=[...pos].map(([k,q])=>({code:R[k].code,ed:q.ed,ep:q.ep,bars:q.bars,lastC:lastC[k],sell:pendSell.has(k),
+  const open=[...pos].map(([k,q])=>({code:R[k].code,ed:q.ed,ep:q.ep,bars:q.bars,lastC:lastC[k],shares:q.sh,cost:q.ecash,sell:pendSell.has(k),
     unreal:(q.sh*lastC[k]*(1-fs)/q.ecash-1)*100}));
   return {series,trades,open,pendingBuy:pendBuy.map(k=>({code:R[k].code,rsi:R[k].I.r[R[k].bars.length-1]}))};
 }
@@ -749,7 +786,7 @@ function compute(){
   sel.innerHTML='<option value="__all">Sistem gabungan '+P.slots+' slot dari '+RESULTS.length+' saham</option>'+RESULTS.map(r=>'<option value="'+esc(r.code)+'">'+esc(r.code)+'</option>').join('');
   sel.value=[...sel.options].some(o=>o.value===keep)?keep:'__all';
   if(!RESULTS.length){ renderEmpty(); setStatus('Tidak ada saham yang bisa dihitung.'); renderDiag(); return; }
-  renderView(); renderWatch(); renderRecommendations(); renderDiag();
+  renderView(); renderPortfolioSummary(); renderWatch(); renderRecommendations(); renderDiag();
   const warn=[];
   if(SKIPPED.length) warn.push(SKIPPED.length+' saham tidak dihitung: '+SKIPPED.map(s=>s.code+(s.why?' ('+s.why+')':'')).join('; ')+'.');
   if(P.feeBuy===0&&P.feeSell===0) warn.push('Biaya transaksi 0%, sehingga hasil lebih bagus daripada kenyataan.');
@@ -793,8 +830,39 @@ function renderEmpty(){
   $('actBody').innerHTML=''; $('wlBody').innerHTML='';
   $('actEmpty').style.display='block'; $('wlEmpty').style.display='block';
   $('cntAktif').textContent='0'; $('cntPantau').textContent='0';
+  ['portfolioValue','portfolioCash','portfolioInvested','portfolioSlots','portfolioUnrealized'].forEach(id=>$(id).textContent='—');
+  $('portfolioDate').textContent='Belum ada data';
+  $('portfolioExposure').textContent='Eksposur portofolio';
+  $('portfolioQueued').textContent='Antrean beli: —';
   $('recoBody').innerHTML='<tr><td colspan="7" class="l empty">Belum ada data untuk rekomendasi.</td></tr>';
   ['recoBuy','recoHold','recoSell','recoWatch','recoCount'].forEach(id=>$(id).textContent='0');
+}
+function renderPortfolioSummary(){
+  if(!P||!PORT||!PORT.series.length){ renderEmpty(); return; }
+  const last=PORT.series[PORT.series.length-1];
+  const open=PORT.open;
+  const heldAtClose=open.reduce((sum,o)=>sum+o.shares*o.lastC,0);
+  const liveAdjustment=open.reduce((sum,o)=>{
+    const quote=QUOTES[o.code];
+    return sum+(quote&&Number.isFinite(quote.price)?o.shares*(quote.price-o.lastC):0);
+  },0);
+  const value=last.eq+liveAdjustment;
+  const invested=open.reduce((sum,o)=>sum+o.shares*priceFor(o.code,RESULTS.find(r=>r.code===o.code).bars).px,0);
+  const cash=last.eq-heldAtClose;
+  const unrealized=open.reduce((sum,o)=>{
+    const r=RESULTS.find(x=>x.code===o.code), price=priceFor(o.code,r.bars).px;
+    return sum+o.shares*price*(1-P.feeSell/100)-o.cost;
+  },0);
+  const exposure=value>0?invested/value*100:0;
+  $('portfolioValue').textContent='Rp'+nf0.format(value);
+  $('portfolioCash').textContent='Rp'+nf0.format(cash);
+  $('portfolioInvested').textContent='Rp'+nf0.format(invested);
+  $('portfolioExposure').textContent='Eksposur '+fPct(exposure);
+  $('portfolioSlots').textContent=open.length+' / '+P.slots;
+  $('portfolioQueued').textContent='Antrean beli: '+PORT.pendingBuy.length;
+  $('portfolioUnrealized').textContent=(unrealized>0?'+':'')+'Rp'+nf0.format(unrealized);
+  $('portfolioUnrealized').className=unrealized>0?'gain':unrealized<0?'loss':'';
+  $('portfolioDate').textContent='Data candle '+fDate(last.t)+(liveAdjustment?' · nilai posisi menyesuaikan kuotasi':'');
 }
 function renderKPI(m){
   $('k_wr').textContent=fPct(m.wr);
@@ -951,10 +1019,10 @@ function renderWatchB(){
   }
   $('actBody').innerHTML=rows.join(''); $('cntAktif').textContent=rows.length; $('actEmpty').style.display=rows.length?'none':'block';
   const f=$('wlFilter').value, q=$('wlSearch').value.trim().toUpperCase();
-  const held=new Set(PORT?PORT.open.map(o=>o.code):[]);
+  const held=new Set(PORT?[...PORT.open.map(o=>o.code),...PORT.pendingBuy.map(o=>o.code)]:[]);
   let list=RESULTS.filter(r=>!held.has(r.code)).filter(r=>(f==='all'||(f==='gc'?r.bt.lastTrend:!r.bt.lastTrend))&&(!q||r.code.includes(q)));
   list.sort((a,b)=>(b.bt.lastTrend-a.bt.lastTrend)||((a.bt.lastRsi||0)-(b.bt.lastRsi||0)));
-  $('cntPantau').textContent=RESULTS.length-held.size; $('wlEmpty').style.display=list.length?'none':'block';
+  $('cntPantau').textContent=list.length; $('wlEmpty').style.display=list.length?'none':'block';
   $('wlBody').innerHTML=list.map(r=>{ const bt=r.bt, pr=priceFor(r.code,r.bars), last=r.bars[r.bars.length-1], gap=(last.c/bt.lastS200-1)*100;
     const st=bt.lastSig?'<span class="tag up">Sinyal beli</span><span class="mini">'+(bt.lastGoldenCross?'Golden cross':'RSI pullback < '+P.rsiE)+'</span>':bt.lastTrend?'<span class="tag">Dalam tren · tunggu RSI &lt; '+P.rsiE+' atau golden cross</span>':'<span class="tag">Di luar tren</span>';
     return '<tr><td class="l"><strong>'+esc(r.code)+'</strong></td><td><strong>'+nfP.format(pr.px)+'</strong></td><td class="'+(bt.lastSig?'gain':'')+'">'+(isFinite(bt.lastRsi)?nf2.format(bt.lastRsi):'—')+'</td><td class="l">'+st+'</td><td>'+fPct(gap,true)+'</td><td class="l"><span class="mini">'+esc(pr.per)+'</span></td></tr>'; }).join('');
@@ -995,7 +1063,7 @@ async function updateQuotes(){
   }
   try{
     await Promise.all([worker(),worker(),worker()]);
-    if(RESULTS.length){ renderWatch(); renderRecommendations(); }
+    if(RESULTS.length){ renderPortfolioSummary(); renderWatch(); renderRecommendations(); }
     renderDiag();
     setStatus('Kuotasi Yahoo: '+ok+'/'+codes.length+' berhasil, '+fail+' gagal · '+fTime(Date.now())+'. Pembaruan candle backtest tidak berubah.');
   }finally{ quoteBusy=false; }
